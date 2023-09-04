@@ -1,8 +1,7 @@
-from random import *
 from re import RegexFlag, findall
 import tkinter as tk
 from dataclasses import dataclass
-
+import random as rd
 
 worldMap = [
     ['S', 'S', 'S', 'S', 'I', 'I', 'I', 'I', 'I', 'I', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'I', 'I',
@@ -89,148 +88,156 @@ class GlobalWarmingModel():
         for y in range(self.world_dimention.width):
             for x in range(self.world_dimention.length):
                 cell = self.grid.getCellAt(y, x)
-                cell.setCanvasId(
+                cell.set_canvas_id(
                     self.canvas.create_rectangle(
                         x*self.world_dimention.cell_size,
                         y*self.world_dimention.cell_size,
                         (x+1)*self.world_dimention.cell_size,
                         (y+1)*self.world_dimention.cell_size,
-                        fill=cell.getColor()))
-                cell.setCanvasText(
+                        fill=cell.get_color()))
+                cell.set_canvas_text(
                     self.canvas.create_text(
                         (x + 0.5) * worldDiemention.cell_size,
                         (y + 0.5) *
                         worldDiemention.cell_size,
-                        text=str(cell.getTemprature())))
+                        text=str(cell.get_temprature())))
 
+
+# TODO: need to redisgn this unreadable class
+#  change to: abstract factory of cells which creates
+#  cells factory of position, graphics and type
+#  neighbors factory of up, down, left, rigth
+#  current forcast
 
 class Cell():
-    def __init__(self, posY, posX) -> None:
-        self.posX = posX
-        self.posY = posY
-        self.cellType: str
-        self.canvasText: Canvas
-        self.canvasId: Canvas
+    """creates cell with a position, type and souraounding cell neighborhood"""
+
+    def __init__(self, pos_y, pos_x) -> None:
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.cell_type: str
+        self.canvas_text: tk.Canvas
+        self.canvas_id: tk.Canvas
         self.color: str
 
-        self.norhNeighbor: Cell
-        self.southNeighbor: Cell
-        self.westNeighbor: Cell
-        self.eastNeighbor: Cell
+        self.norh_neighbor: Cell
+        self.south_neighbor: Cell
+        self.west_neighbor: Cell
+        self.east_neighbor: Cell
 
         self.temprature: int
-        self.airPolution: int
-        self.windDirectin: int
-        self.windSpeed: int
+        self.air_polution: int
+        self.wind_directin: int
+        self.wind_speed: int
         self.clouds: int
 
-        self.cellType = worldMap[self.posY][self.posX]
+        self.cell_type = worldMap[self.pos_y][self.pos_x]
 
-        if self.cellType == 'F':
+        if self.cell_type == 'F':
             self.color = '#7ed321'
-        elif self.cellType == 'I':
+        elif self.cell_type == 'I':
             self.color = '#ffffff'
-        elif self.cellType == 'C':
+        elif self.cell_type == 'C':
             self.color = '#9b9b9b'
-        elif self.cellType == 'D':
+        elif self.cell_type == 'D':
             self.color = '#f8e71c'
-        elif self.cellType == 'S':
+        elif self.cell_type == 'S':
             self.color = '#1273de'
-        elif self.cellType == 'M':
+        elif self.cell_type == 'M':
             self.color = '#1976d2'
 
-        if self.cellType == 'F':
-            self.temprature = randint(20, 30)
-        elif self.cellType == 'I':
-            self.temprature = randint(-30, 0)
-        elif self.cellType == 'C':
-            self.temprature = randint(20, 40)
-        elif self.cellType == 'D':
-            self.temprature = randint(30, 40)
-        elif self.cellType == 'S':
-            self.temprature = randint(10, 20)
-        elif self.cellType == 'M':
-            self.temprature = randint(0, 10)
+        if self.cell_type == 'F':
+            self.temprature = rd.randint(20, 30)
+        elif self.cell_type == 'I':
+            self.temprature = rd.randint(-30, 0)
+        elif self.cell_type == 'C':
+            self.temprature = rd.randint(20, 40)
+        elif self.cell_type == 'D':
+            self.temprature = rd.randint(30, 40)
+        elif self.cell_type == 'S':
+            self.temprature = rd.randint(10, 20)
+        elif self.cell_type == 'M':
+            self.temprature = rd.randint(0, 10)
 
-        if self.cellType == 'C':
-            self.airPolution = 1
+        if self.cell_type == 'C':
+            self.air_polution = 1
         else:
-            self.airPolution = 0
+            self.air_polution = 0
 
-        self.windDirection = choice(['N', 'S', 'W', 'E'])
-        self.windSpeed = randint(0, 30)
+        self.wind_direction = rd.choice(['N', 'S', 'W', 'E'])
+        self.wind_speed = rd.randint(0, 30)
 
-        self.clouds = choice([True, False])
+        self.clouds = rd.choice([True, False])
         if self.clouds:
-            if self.cellType == 'F':
+            if self.cell_type == 'F':
                 self.color = '#f8e71c'
-            elif self.cellType == 'I':
+            elif self.cell_type == 'I':
                 self.color = '#999999'
-            elif self.cellType == 'C':
+            elif self.cell_type == 'C':
                 self.color = '#9b9b9b'
-            elif self.cellType == 'D':
+            elif self.cell_type == 'D':
                 self.color = '#a19505'
-            elif self.cellType == 'S':
+            elif self.cell_type == 'S':
                 self.color = '#0f477e'
-            elif self.cellType == 'M':
+            elif self.cell_type == 'M':
                 self.color = '#a16707'
 
-    def getTemprature(self):
+    def get_temprature(self):
         return self.temprature
 
-    def getAirPolution(self):
-        return self.airPolution
+    def get_air_polution(self):
+        return self.air_polution
 
-    def getWind(self):
-        return self.windDirection, self.windSpeed
+    def get_wind(self):
+        return self.wind_direction, self.wind_speed
 
-    def getClouds(self):
+    def get_clouds(self):
         return self.clouds
 
-    def getColor(self):
+    def get_color(self):
         return self.color
 
-    def setCanvasId(self, canvasId: Canvas):
-        self.canvasId = canvasId
+    def set_canvas_id(self, canvasId: tk.Canvas):
+        self.canvas_id = canvasId
 
-    def getCanvasId(self):
-        return self.canvasId
+    def get_canvas_id(self):
+        return self.canvas_id
 
-    def setCanvasText(self, text: str):
-        self.canvasText = text
+    def set_canvas_text(self, text: str):
+        self.canvas_text = text
 
-    def getCanvasText(self):
-        return self.canvasText
+    def get_canvas_text(self):
+        return self.canvas_text
 
-    def getXPosition(self):
-        return self.posX
+    def get_x_position(self):
+        return self.pos_x
 
-    def getYPosition(self):
-        return self.posY
+    def get_y_position(self):
+        return self.pos_y
 
-    def getNorthNeighbor(self):
-        return self.norhNeighbor
+    def get_north_neighbor(self):
+        return self.norh_neighbor
 
-    def setNorthNeighbor(self, neighbor):
-        self.norhNeighbor = neighbor
+    def set_north_neighbor(self, neighbor):
+        self.norh_neighbor = neighbor
 
-    def getSouthNeighbor(self):
-        return self.southNeighbor
+    def get_south_neighbor(self):
+        return self.south_neighbor
 
-    def setSouthNeighbor(self, neighbor):
-        self.southNeighbor = neighbor
+    def set_south_neighbor(self, neighbor):
+        self.south_neighbor = neighbor
 
-    def getWestNeighbor(self):
-        return self.westNeighbor
+    def get_west_neighbor(self):
+        return self.west_neighbor
 
-    def setWestNeighbor(self, neighbor):
-        self.westNeighbor = neighbor
+    def set_west_neighbor(self, neighbor):
+        self.west_neighbor = neighbor
 
-    def getEastNeighbor(self):
-        return self.eastNeighbor
+    def get_east_neighbor(self):
+        return self.east_neighbor
 
-    def setEastNeighbor(self, neighbor):
-        self.eastNeighbor = neighbor
+    def set_east_neighborr(self, neighbor):
+        self.east_neighbor = neighbor
 
 
 class Grid():
@@ -252,38 +259,38 @@ class Grid():
                 currCell = self.getCellAt(y, x)
 
                 if self.cellNorthBound(currCell):
-                    currCell.setNorthNeighbor(
+                    currCell.set_north_neighbor(
                         self.getCellAt(self.dimentions.width - 1, x))
                 else:
-                    currCell.setNorthNeighbor(self.getCellAt(y-1, x))
+                    currCell.set_north_neighbor(self.getCellAt(y-1, x))
 
                 if self.cellSouthBound(currCell):
-                    currCell.setSouthNeighbor(self.getCellAt(0, x))
+                    currCell.set_south_neighbor(self.getCellAt(0, x))
                 else:
-                    currCell.setSouthNeighbor(self.getCellAt(y+1, x))
+                    currCell.set_south_neighbor(self.getCellAt(y+1, x))
 
                 if self.cellWestBound(currCell):
-                    currCell.setWestNeighbor(
+                    currCell.set_west_neighbor(
                         self.getCellAt(y, self.dimentions.length - 1))
                 else:
-                    currCell.setWestNeighbor(self.getCellAt(y, x-1))
+                    currCell.set_west_neighbor(self.getCellAt(y, x-1))
 
                 if self.cellEastBound(currCell):
-                    currCell.setEastNeighbor(self.getCellAt(y, 0))
+                    currCell.set_east_neighborr(self.getCellAt(y, 0))
                 else:
-                    currCell.setEastNeighbor(self.getCellAt(y, x+1))
+                    currCell.set_east_neighborr(self.getCellAt(y, x+1))
 
     def cellNorthBound(self, cell: Cell):
-        return cell.getYPosition == 0
+        return cell.get_y_position == 0
 
     def cellSouthBound(self, cell: Cell):
-        return cell.getYPosition() > self.dimentions.width - 2
+        return cell.get_y_position() > self.dimentions.width - 2
 
     def cellWestBound(self, cell: Cell):
-        return cell.getXPosition() == 0
+        return cell.get_x_position() == 0
 
     def cellEastBound(self, cell: Cell):
-        return cell.getXPosition() > self.dimentions.length - 2
+        return cell.get_x_position() > self.dimentions.length - 2
 
 
 if __name__ == "__main__":
