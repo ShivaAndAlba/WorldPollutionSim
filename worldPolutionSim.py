@@ -45,6 +45,7 @@ worldMap = [
     ['I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I']]
 
 
+# TODO: missing: engine to run simulation and calculate each next cell state
 @dataclass
 class WorldDiementions:
     length: int
@@ -85,28 +86,28 @@ class GlobalWarmingModel():
 
     def insert_cell(self):
         """create and insert cells to canvas"""
-        for y in range(self.world_dimention.width):
-            for x in range(self.world_dimention.length):
-                cell = self.grid.getCellAt(y, x)
+        for point_y in range(self.world_dimention.width):
+            for point_x in range(self.world_dimention.length):
+                cell = self.grid.get_cell_at(point_y, point_x)
                 cell.set_canvas_id(
                     self.canvas.create_rectangle(
-                        x*self.world_dimention.cell_size,
-                        y*self.world_dimention.cell_size,
-                        (x+1)*self.world_dimention.cell_size,
-                        (y+1)*self.world_dimention.cell_size,
+                        point_x*self.world_dimention.cell_size,
+                        point_y*self.world_dimention.cell_size,
+                        (point_x+1)*self.world_dimention.cell_size,
+                        (point_y+1)*self.world_dimention.cell_size,
                         fill=cell.get_color()))
                 cell.set_canvas_text(
                     self.canvas.create_text(
-                        (x + 0.5) * worldDiemention.cell_size,
-                        (y + 0.5) *
+                        (point_x + 0.5) * worldDiemention.cell_size,
+                        (point_y + 0.5) *
                         worldDiemention.cell_size,
                         text=str(cell.get_temprature())))
 
 
 # TODO: need to redisgn this unreadable class
-#  change to: abstract factory of cells which creates
-#  cells factory of position, graphics and type
-#  neighbors factory of up, down, left, rigth
+#  change to: cells factory of
+#  position, graphics and type
+#  neighbors up, down, left, rigth
 #  current forcast
 
 class Cell():
@@ -240,56 +241,64 @@ class Cell():
         self.east_neighbor = neighbor
 
 
+# TODO: rewrite this class mmore organized
 class Grid():
+    """two dimenional array of cellls
+    manages creation and updates of each cell state"""
+
     def __init__(self, dimentions: WorldDiementions) -> None:
         self.dimentions = dimentions
-        self.grid = [[self.createCellAt(y, x) for x in range(
+        self.grid = [[self.create_cell_at(y, x) for x in range(
             dimentions.length)] for y in range(dimentions.width)]
-        self.updateCellsNeighbors()
+        self.update_cells_neighbors()
 
-    def createCellAt(self, y, x):
-        return Cell(y, x)
+    def create_cell_at(self, point_y, point_x):
+        return Cell(point_y, point_x)
 
-    def getCellAt(self, y, x):
-        return self.grid[y][x]
+    def get_cell_at(self, point_y, point_x):
+        return self.grid[point_y][point_x]
 
-    def updateCellsNeighbors(self):
-        for y in range(self.dimentions.width):
-            for x in range(self.dimentions.length):
-                currCell = self.getCellAt(y, x)
+    def update_cells_neighbors(self):
+        for point_y in range(self.dimentions.width):
+            for point_x in range(self.dimentions.length):
+                curr_cell = self.get_cell_at(point_y, point_x)
 
-                if self.cellNorthBound(currCell):
-                    currCell.set_north_neighbor(
-                        self.getCellAt(self.dimentions.width - 1, x))
+                if self.cell_north_bound(curr_cell):
+                    curr_cell.set_north_neighbor(
+                        self.get_cell_at(self.dimentions.width - 1, point_x))
                 else:
-                    currCell.set_north_neighbor(self.getCellAt(y-1, x))
+                    curr_cell.set_north_neighbor(
+                        self.get_cell_at(point_y-1, point_x))
 
-                if self.cellSouthBound(currCell):
-                    currCell.set_south_neighbor(self.getCellAt(0, x))
+                if self.cell_south_bound(curr_cell):
+                    curr_cell.set_south_neighbor(self.get_cell_at(0, point_x))
                 else:
-                    currCell.set_south_neighbor(self.getCellAt(y+1, x))
+                    curr_cell.set_south_neighbor(
+                        self.get_cell_at(point_y+1, point_x))
 
-                if self.cellWestBound(currCell):
-                    currCell.set_west_neighbor(
-                        self.getCellAt(y, self.dimentions.length - 1))
+                if self.cell_west_bound(curr_cell):
+                    curr_cell.set_west_neighbor(
+                        self.get_cell_at(point_y, self.dimentions.length - 1))
                 else:
-                    currCell.set_west_neighbor(self.getCellAt(y, x-1))
+                    curr_cell.set_west_neighbor(
+                        self.get_cell_at(point_y, point_x-1))
 
-                if self.cellEastBound(currCell):
-                    currCell.set_east_neighborr(self.getCellAt(y, 0))
+                if self.cell_east_bound(curr_cell):
+                    curr_cell.set_east_neighborr(self.get_cell_at(point_y, 0))
                 else:
-                    currCell.set_east_neighborr(self.getCellAt(y, x+1))
+                    curr_cell.set_east_neighborr(
+                        self.get_cell_at(point_y, point_x+1))
 
-    def cellNorthBound(self, cell: Cell):
+    def cell_north_bound(self, cell: Cell):
         return cell.get_y_position == 0
 
-    def cellSouthBound(self, cell: Cell):
+    def cell_south_bound(self, cell: Cell):
         return cell.get_y_position() > self.dimentions.width - 2
 
-    def cellWestBound(self, cell: Cell):
+    def cell_west_bound(self, cell: Cell):
         return cell.get_x_position() == 0
 
-    def cellEastBound(self, cell: Cell):
+    def cell_east_bound(self, cell: Cell):
         return cell.get_x_position() > self.dimentions.length - 2
 
 
