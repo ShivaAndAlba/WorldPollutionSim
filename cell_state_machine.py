@@ -1,3 +1,4 @@
+import tkinter as tk
 from abc import ABC, abstractmethod
 from random import randint
 
@@ -35,11 +36,21 @@ class Cell:
     """
 
     _state = None
+    state_map = {"S": Sea, "I": Ice, "F": Forest, "D": Desert, "M": Mountain, "C": City}
 
-    def __init__(self, state: State, point: tuple):
-        self._point = point
+    def __init__(self, point: tuple, cell_type: str):
+        state = self.state_map[cell_type]
+        self._coordinates = point
         self.init_weather(state)
         self.transition(state)
+
+    @property
+    def canvas(self):
+        return self._canvas
+
+    @canvas.setter
+    def canvas(self, id: int):
+        self._canvas = CellCanvas(id)
 
     @property
     def neighbors(self):
@@ -52,12 +63,12 @@ class Cell:
     @property
     def x_cord(self) -> int:
         """returns x coordinate"""
-        return self._point[0]
+        return self._coordinates[0]
 
     @property
     def y_cord(self) -> int:
         """returns y coordinate"""
-        return self._point[1]
+        return self._coordinates[1]
 
     @property
     def temperature(self) -> int:
@@ -289,3 +300,24 @@ class Neighborhood(Grid):
 
     def mean_of(self, prop: str) -> int:
         return np.mean([temp.__dict__[prop] for temp in self.everyone().values()])
+
+
+class CellCanvas(Cell):
+    def cell_color(self) -> str:
+        return self.state.state_color
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, id: int):
+        self._id = id
+
+    @property
+    def text(self) -> int:
+        return self._text
+
+    @text.setter
+    def text(self, text: int):
+        self._text = text
