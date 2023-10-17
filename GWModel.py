@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tkinter as tk
 from dataclasses import dataclass
+from functools import partial
 from random import randint
 
 import numpy as np
@@ -40,17 +41,78 @@ class GlobalWarmingModel:
 
 class Gui:
     def __init__(self):
+        self.blocked = False
+        self.sim_iter = 300
+
         """creates gui via tkinter"""
         self.root = tk.Tk()
         self.title = self.root.title("Air Polution Model - Ex. 11")
-        self.label = tk.Label(self.root)
-        self.label.pack()
+
+        # # label
+        # self.label = tk.Label(self.root)
+        # self.label.pack()
+
+        # canvas frame
+        self.canvas_frame = tk.Frame(self.root)
+        self.canvas_frame.grid(row=0, column=1)
         self._canvas = tk.Canvas(
-            self.root,
+            self.canvas_frame,
             height=g_world_diemention.width,
             width=g_world_diemention.length,
         )
         self._canvas.pack()
+
+        # buttons frame
+        self.btn_frame = tk.Frame(self.root)
+        self.btn_frame.grid(row=0, column=0, columnspan=1)
+
+        self.run_btn = tk.Button(
+            self.btn_frame, text="Run", command=self.sim_run, width=7
+        ).pack(expand=True)
+        self.stop_btn = tk.Button(
+            self.btn_frame, text="Stop", command=self.sim_stop, width=7
+        ).pack(expand=True)
+        self.reset_btn = tk.Button(
+            self.btn_frame, text="Reset", command=self.sim_reset, width=7
+        ).pack(expand=True)
+        self.quit_btn = tk.Button(
+            self.btn_frame, text="Quit", command=self.root.destroy, width=7
+        ).pack(expand=True)
+
+        # entry frame
+        self.entry_frame = tk.Frame(self.root)
+        self.entry_frame.grid(row=1, column=0, columnspan=1, rowspan=1)
+
+        self.entry_label = tk.Label(
+            self.entry_frame, text="Set # itterations(Default:300)"
+        )
+        self.entry_box = tk.Entry(self.entry_frame, width=11)
+        self.entry_box.insert(0, str(self.sim_iter))
+        self.entry_box.pack()
+
+        self.set_itter_callable = partial(self.set_itteration, self.entry_box)
+        self.set_btn = tk.Button(
+            self.entry_frame, text="Set", command=self.set_itter_callable, width=7
+        ).pack(expand=True)
+
+    def set_itteration(self):
+        self.sim_iter = self.entry_box.get()
+
+    def sim_run(self):
+        self.blocked = False
+        # for step in range(iterations):
+        # calculate next generation
+        # update canvas
+        # calculate average and store
+        # chech if sim_run  is false then exit
+        # wait for 50 ms
+        pass
+
+    def sim_reset(self):
+        self.sim_iter = 300
+
+    def sim_stop(self):
+        self.blocked = True
 
     def tk_mainloop(self):
         self.root.mainloop()
