@@ -96,12 +96,14 @@ class Gui:
         ).pack(expand=True)
 
     def set_itteration(self):
-        self.sim_iter = self.entry_box.get()
+        self.sim_iter = int(self.entry_box.get())
 
     def sim_run(self):
         self.blocked = False
-        # for step in range(iterations):
-        # calculate next generation
+
+        for step in range(self.sim_iter):
+            # calculate next generation
+            self.calculate_next_gen()
         # update canvas
         # calculate average and store
         # chech if sim_run  is false then exit
@@ -136,6 +138,12 @@ class Gui:
     def init_cell_neighbors(self):
         self.grid.init_cell_neighbors()
 
+    def calculate_next_gen(self):
+        for y in range(g_world_diemention.cell_num_width):
+            for x in range(g_world_diemention.cell_num_length):
+                print("itr:", x, y)
+                self.grid.cell_at(y, x).state.effect()
+
 
 class Grid(Gui):
     """two dimenional array of cellls
@@ -161,9 +169,12 @@ class Grid(Gui):
         self._cell_canvas_matrix = mat
 
     def init_cell_neighbors(self):
-        for y in range(len(self.cell_obj_matx)):
-            for x in range(y):
-                self.cell_at(x, y).neighbors_init(self)
+        for x in range(g_world_diemention.cell_num_length):
+            for y in range(g_world_diemention.cell_num_width):
+                self.cell_at(y, x).neighbors_init(self)
+        # for row in self.cell_obj_matx:
+        #     for cell in row:
+        #         cell.neighbors_init(self)
 
     def cell_at(self, point_y, point_x):
         return self.cell_obj_matx[point_y][point_x]
@@ -274,8 +285,9 @@ class Neighborhood(Grid):
     def everyone(self) -> dict[str, Cell]:
         return {"N": self.north, "S": self.south, "W": self.west, "E": self.east}
 
-    def mean_of(self, prop: str) -> int:
-        return np.mean([temp.__dict__[prop] for temp in self.everyone().values()])
+    def mean_of(self) -> dict:
+        temp_mean = np.mean([temp.temperature for temp in self.everyone().values()])
+        return {"temp_mean": temp_mean}
 
 
 class Cell:

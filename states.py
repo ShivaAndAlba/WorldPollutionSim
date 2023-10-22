@@ -39,10 +39,10 @@ class State(ABC):
     def effect(self):
         pass
 
-    def temp_effect(self, factors: dict, temp_range: dict):
-        mean_temp = self.cell.neighbors.mean_of("temperature")
+    def temp_effect(self, temp_range: dict, factors: dict):
+        mean_temp = self.cell.neighbors.mean_of()["temp_mean"]
         self.cell.temperature = (
-            np.mean([self.cell.temperature, mean_temp]) * factors["temp_fact"]
+            np.mean([self.cell.temperature, mean_temp]) * factors["temp"]
         )
 
         if self.cell.temperature > temp_range["max"]:
@@ -55,10 +55,10 @@ class Sea(State):
     state_symbol = "S"
     state_color = "#1273de"
     temp_range = {"min": 0, "max": 35}
-    factors = {"temp_fact": 0.8}
+    factors = {"temp": 0.8}
 
     def effect(self):
-        self.temp_effect(self.factors, self.temp_range)
+        self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["min"]:
             self.cell.transition(Ice)
 
@@ -70,7 +70,7 @@ class Ice(State):
     factors = {"temp": 0.6}
 
     def effect(self):
-        self.temp_effect(self.factors, self.temp_range)
+        self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
             self.cell.transition(Sea)
 
