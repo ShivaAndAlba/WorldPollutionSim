@@ -4,6 +4,7 @@ import tkinter as tk
 from dataclasses import dataclass
 from functools import partial
 from random import randint
+from time import sleep
 
 import numpy as np
 
@@ -101,13 +102,18 @@ class Gui:
     def sim_run(self):
         self.blocked = False
 
-        for step in range(self.sim_iter):
+        for _ in range(self.sim_iter):
             # calculate next generation
             self.calculate_next_gen()
-        # update canvas
-        # calculate average and store
-        # chech if sim_run  is false then exit
-        # wait for 50 ms
+            # transition every cell to new state
+            self.transition_cells()
+            # update canvas
+            # calculate average and store
+            # chech if sim_run  is false then exit
+            if self.blocked:
+                break
+            # wait for 50 ms
+            sleep(0.1)
         pass
 
     def sim_reset(self):
@@ -144,6 +150,12 @@ class Gui:
                 print("itr:", x, y)
                 self.grid.cell_at(y, x).state.effect()
 
+    def transition_cells(self):
+        for y in range(g_world_diemention.cell_num_width):
+            for x in range(g_world_diemention.cell_num_length):
+                print("transition:", x, y)
+                self.grid.cell_at(y, x).transition_to_next_gen()
+
 
 class Grid(Gui):
     """two dimenional array of cellls
@@ -172,9 +184,6 @@ class Grid(Gui):
         for x in range(g_world_diemention.cell_num_length):
             for y in range(g_world_diemention.cell_num_width):
                 self.cell_at(y, x).neighbors_init(self)
-        # for row in self.cell_obj_matx:
-        #     for cell in row:
-        #         cell.neighbors_init(self)
 
     def cell_at(self, point_y, point_x):
         return self.cell_obj_matx[point_y][point_x]
@@ -328,6 +337,7 @@ class Cell:
     }
 
     def __init__(self, coordinate: tuple[int, int], cell_type: str):
+        self.transition_queue = []
         self._coordinates = coordinate
         self.init_weather(self.state_map[cell_type])
 
@@ -387,7 +397,15 @@ class Cell:
             self.state.temp_range["min"], self.state.temp_range["max"]
         )
 
-    def transition(self, state):
+    def transition_enqueue(self, state: Sea | Ice | Forest | Desert | City | Mountain):
+        self.transition_queue.append(state)
+
+    def transition_to_next_gen(self):
+        if self.transition_queue:
+            state = self.transition_queue.pop()
+            self.transition(state)
+
+    def transition(self, state: Sea | Ice | Forest | Desert | City | Mountain):
         self._state = state
         self._state.cell = self
 

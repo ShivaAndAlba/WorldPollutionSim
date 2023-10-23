@@ -60,7 +60,7 @@ class Sea(State):
     def effect(self):
         self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition(Ice)
+            self.cell.transition_enqueue(Ice)
 
 
 class Ice(State):
@@ -72,7 +72,7 @@ class Ice(State):
     def effect(self):
         self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition(Sea)
+            self.cell.transition_enqueue(Sea)
 
 
 class Forest(State):
@@ -84,9 +84,9 @@ class Forest(State):
     def effect(self):
         self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition(Desert)
+            self.cell.transition_enqueue(Desert)
         elif self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition(Ice)
+            self.cell.transition_enqueue(Ice)
 
 
 class Desert(State):
@@ -98,7 +98,7 @@ class Desert(State):
     def effect(self):
         self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition(Forest)
+            self.cell.transition_enqueue(Forest)
 
 
 class City(State):
@@ -110,7 +110,7 @@ class City(State):
     def effect(self):
         self.temp_effect(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition(Desert)
+            self.cell.transition_enqueue(Desert)
 
 
 class Mountain(State):
