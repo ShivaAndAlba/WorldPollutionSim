@@ -43,15 +43,11 @@ class GlobalWarmingModel:
 class Gui:
     def __init__(self):
         self.blocked = False
-        self.sim_iter = 300
+        self.sim_iter = 20
 
         """creates gui via tkinter"""
         self.root = tk.Tk()
         self.title = self.root.title("Air Polution Model - Ex. 11")
-
-        # # label
-        # self.label = tk.Label(self.root)
-        # self.label.pack()
 
         # canvas frame
         self.canvas_frame = tk.Frame(self.root)
@@ -91,7 +87,7 @@ class Gui:
         self.entry_box.insert(0, str(self.sim_iter))
         self.entry_box.pack()
 
-        self.set_itter_callable = partial(self.set_itteration, self.entry_box)
+        self.set_itter_callable = partial(self.set_itteration)
         self.set_btn = tk.Button(
             self.entry_frame, text="Set", command=self.set_itter_callable, width=7
         ).pack(expand=True)
@@ -103,21 +99,23 @@ class Gui:
         self.blocked = False
 
         for _ in range(self.sim_iter):
+            print("itr:", _)
             # calculate next generation
             self.calculate_next_gen()
-            # transition every cell to new state
-            self.transition_cells()
-            # update canvas
+            # transition every cell to new state ,
+            # update temp text and update cell color
+            self.update_cells()
+            self.root.update_idletasks()
             # calculate average and store
             # chech if sim_run  is false then exit
             if self.blocked:
                 break
             # wait for 50 ms
-            sleep(0.1)
+            sleep(0.3)
         pass
 
     def sim_reset(self):
-        self.sim_iter = 300
+        self.sim_iter = 20
 
     def sim_stop(self):
         self.blocked = True
@@ -147,14 +145,15 @@ class Gui:
     def calculate_next_gen(self):
         for y in range(g_world_diemention.cell_num_width):
             for x in range(g_world_diemention.cell_num_length):
-                print("itr:", x, y)
                 self.grid.cell_at(y, x).state.effect()
 
-    def transition_cells(self):
+    def update_cells(self):
         for y in range(g_world_diemention.cell_num_width):
             for x in range(g_world_diemention.cell_num_length):
-                print("transition:", x, y)
-                self.grid.cell_at(y, x).transition_to_next_gen()
+                cell = self.grid.cell_at(y, x)
+                cell.transition_to_next_gen()
+                cell.update_cell_color()
+                cell.update_cell_text()
 
 
 class Grid(Gui):
@@ -195,10 +194,12 @@ class CellCanvas(Gui):
         self.gui = gui
         self.cell_size = cell_size
         self.cell = cell
-        self.draw_cell()
+        self.cell.cell_canvas = self
+        self.cell_canvas = self.draw_cell()
+        self.cell_text = self.init_text()
 
     def draw_cell(self):
-        self.gui.canvas.create_rectangle(
+        return self.gui.canvas.create_rectangle(
             self.cell.x_cord * self.cell_size,
             self.cell.y_cord * self.cell_size,
             (self.cell.x_cord + 1) * self.cell_size,
@@ -209,11 +210,19 @@ class CellCanvas(Gui):
     def cell_color(self) -> str:
         return self.cell.state.state_color
 
-    def text(self, text):
-        self.gui.canvas.create_text(
+    def update_cell_color(self):
+        self.gui.canvas.itemconfig(self.cell_canvas, fill=self.cell_color())
+
+    def init_text(self):
+        return self.gui.canvas.create_text(
             (self.cell.x_cord + 0.5) * self.cell_size,
             (self.cell.y_cord + 0.5) * self.cell_size,
-            text=str(text),
+            text=str(self.cell.temperature),
+        )
+
+    def update_text(self):
+        self.gui.canvas.itemconfigure(
+            self.cell_text, text=str(int(self.cell.temperature))
         )
 
 
@@ -327,16 +336,16 @@ class Cell:
 
     """
 
-    state_map = {
-        "S": Sea(),
-        "I": Ice(),
-        "F": Forest(),
-        "D": Desert(),
-        "M": Mountain(),
-        "C": City(),
-    }
-
     def __init__(self, coordinate: tuple[int, int], cell_type: str):
+        self.state_map = {
+            "S": Sea(),
+            "I": Ice(),
+            "F": Forest(),
+            "D": Desert(),
+            "M": Mountain(),
+            "C": City(),
+        }
+
         self.transition_queue = []
         self._coordinates = coordinate
         self.init_weather(self.state_map[cell_type])
@@ -391,8 +400,22 @@ class Cell:
     def clouds(self, val: float):
         self._clouds = val
 
-    def init_weather(self, concrete_state):
-        self.transition(concrete_state)
+    @property
+    def cell_canvas(self) -> CellCanvas:
+        return self._cell_canvas
+
+    @cell_canvas.setter
+    def cell_canvas(self, cell_canvas_inst: CellCanvas):
+        self._cell_canvas = cell_canvas_inst
+
+    def update_cell_color(self):
+        self.cell_canvas.update_cell_color()
+
+    def update_cell_text(self):
+        self.cell_canvas.update_text()
+
+    def init_weather(self, instantiated_concrete_state):
+        self.transition(instantiated_concrete_state)
         self.temperature = randint(
             self.state.temp_range["min"], self.state.temp_range["max"]
         )
@@ -402,8 +425,8 @@ class Cell:
 
     def transition_to_next_gen(self):
         if self.transition_queue:
-            state = self.transition_queue.pop()
-            self.transition(state)
+            print("transition")
+            self.transition(self.transition_queue.pop())
 
     def transition(self, state: Sea | Ice | Forest | Desert | City | Mountain):
         self._state = state

@@ -39,10 +39,10 @@ class State(ABC):
     def effect(self):
         pass
 
-    def temp_effect(self, temp_range: dict, factors: dict):
-        mean_temp = self.cell.neighbors.mean_of()["temp_mean"]
+    def calculate_weather_change(self, temp_range: dict, factors: dict):
         self.cell.temperature = (
-            np.mean([self.cell.temperature, mean_temp]) * factors["temp"]
+            np.mean([self.cell.temperature, self.cell.neighbors.mean_of()["temp_mean"]])
+            * factors["temp"]
         )
 
         if self.cell.temperature > temp_range["max"]:
@@ -58,9 +58,9 @@ class Sea(State):
     factors = {"temp": 0.8}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition_enqueue(Ice)
+            self.cell.transition_enqueue(self.cell.state_map["I"])  # change to Ice
 
 
 class Ice(State):
@@ -70,9 +70,9 @@ class Ice(State):
     factors = {"temp": 0.6}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition_enqueue(Sea)
+            self.cell.transition_enqueue(self.cell.state_map["S"])  # change to Sea
 
 
 class Forest(State):
@@ -82,11 +82,11 @@ class Forest(State):
     factors = {"temp": 0.8}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition_enqueue(Desert)
+            self.cell.transition_enqueue(self.cell.state_map["D"])  # change to Desert
         elif self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition_enqueue(Ice)
+            self.cell.transition_enqueue(self.cell.state_map["I"])  # change to Ice
 
 
 class Desert(State):
@@ -96,9 +96,9 @@ class Desert(State):
     factors = {"temp": 0.4}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["min"]:
-            self.cell.transition_enqueue(Forest)
+            self.cell.transition_enqueue(self.cell.state_map["F"])  # change to Forest
 
 
 class City(State):
@@ -108,9 +108,9 @@ class City(State):
     factors = {"temp": 0.4}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
         if self.cell.temperature == self.temp_range["max"]:
-            self.cell.transition_enqueue(Desert)
+            self.cell.transition_enqueue(self.cell.state_map["D"])  # change to Desert
 
 
 class Mountain(State):
@@ -120,4 +120,4 @@ class Mountain(State):
     factors = {"temp": 0.4}
 
     def effect(self):
-        self.temp_effect(self.temp_range, self.factors)
+        self.calculate_weather_change(self.temp_range, self.factors)
