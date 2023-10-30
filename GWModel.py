@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from dataclasses import dataclass
 from functools import partial
-from random import randint
+from random import choice, randint, random, randrange, uniform
 from time import sleep
 
 import numpy as np
@@ -304,8 +304,12 @@ class Neighborhood(Grid):
         return {"N": self.north, "S": self.south, "W": self.west, "E": self.east}
 
     def mean_of(self) -> dict:
-        temp_mean = np.mean([temp.temperature for temp in self.everyone().values()])
-        return {"temp_mean": temp_mean}
+        temp_mean = np.mean(
+            [neighbor.temperature for neighbor in self.everyone().values()]
+        )
+        wind_neighbors = [neighbor.wind for neighbor in self.everyone().values()]
+        wind_mean = max(wind_neighbors, key=wind_neighbors.count)
+        return {"temp_mean": temp_mean, "wind_mean": wind_mean}
 
 
 class Cell:
@@ -349,6 +353,37 @@ class Cell:
         self.transition_queue = []
         self._coordinates = coordinate
         self.init_weather(self.state_map[cell_type])
+
+    def update_cell_color(self):
+        self.cell_canvas.update_cell_color()
+
+    def update_cell_text(self):
+        self.cell_canvas.update_text()
+
+    def init_weather(self, instantiated_concrete_state):
+        self.transition(instantiated_concrete_state)
+        self.temperature = randint(
+            self.state.temp_range["min"], self.state.temp_range["max"]
+        )
+        self.wind = choice(["N", "S", "W", "E"])
+        self.pollution = (
+            0.7
+            if instantiated_concrete_state == self.state_map["C"]
+            else uniform(0, 0.4)
+        )
+        self.clouds = random()
+
+    def transition_enqueue(self, state: Sea | Ice | Forest | Desert | City | Mountain):
+        self.transition_queue.append(state)
+
+    def transition_to_next_gen(self):
+        if self.transition_queue:
+            print("transition")
+            self.transition(self.transition_queue.pop())
+
+    def transition(self, state: Sea | Ice | Forest | Desert | City | Mountain):
+        self._state = state
+        self._state.cell = self
 
     @property
     def neighbors(self):
@@ -407,30 +442,6 @@ class Cell:
     @cell_canvas.setter
     def cell_canvas(self, cell_canvas_inst: CellCanvas):
         self._cell_canvas = cell_canvas_inst
-
-    def update_cell_color(self):
-        self.cell_canvas.update_cell_color()
-
-    def update_cell_text(self):
-        self.cell_canvas.update_text()
-
-    def init_weather(self, instantiated_concrete_state):
-        self.transition(instantiated_concrete_state)
-        self.temperature = randint(
-            self.state.temp_range["min"], self.state.temp_range["max"]
-        )
-
-    def transition_enqueue(self, state: Sea | Ice | Forest | Desert | City | Mountain):
-        self.transition_queue.append(state)
-
-    def transition_to_next_gen(self):
-        if self.transition_queue:
-            print("transition")
-            self.transition(self.transition_queue.pop())
-
-    def transition(self, state: Sea | Ice | Forest | Desert | City | Mountain):
-        self._state = state
-        self._state.cell = self
 
     @property
     def state(self) -> Sea | Ice | Forest | Desert | City | Mountain:
