@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from dataclasses import dataclass
 from functools import partial
-from random import choice, randint, random, randrange, uniform
+from random import choice, randint, random, uniform
 from time import sleep
 
 import numpy as np
@@ -111,11 +111,11 @@ class Gui:
             if self.blocked:
                 break
             # wait for 50 ms
-            sleep(0.3)
+            sleep(0.1)
         pass
 
     def sim_reset(self):
-        self.sim_iter = 20
+        self.grid.reset()
 
     def sim_stop(self):
         self.blocked = True
@@ -187,8 +187,14 @@ class Grid(Gui):
     def cell_at(self, point_y, point_x):
         return self.cell_obj_matx[point_y][point_x]
 
+    def reset(self):
+        for y in range(g_world_diemention.cell_num_width):
+            for x in range(g_world_diemention.cell_num_length):
+                self.cell_at(y, x).init_weather(worldMap[y][x])
+                self.cell_canvas_matx[y][x].update_cell_color()
+                self.cell_canvas_matx[y][x].update_text()
 
-# TODO: this class should be part of Cell class
+
 class CellCanvas(Gui):
     def __init__(self, gui: Gui, cell: Cell, cell_size: int):
         self.gui = gui
@@ -352,7 +358,7 @@ class Cell:
 
         self.transition_queue = []
         self._coordinates = coordinate
-        self.init_weather(self.state_map[cell_type])
+        self.init_weather(cell_type)
 
     def update_cell_color(self):
         self.cell_canvas.update_cell_color()
@@ -360,17 +366,13 @@ class Cell:
     def update_cell_text(self):
         self.cell_canvas.update_text()
 
-    def init_weather(self, instantiated_concrete_state):
-        self.transition(instantiated_concrete_state)
+    def init_weather(self, cell_type: str):
+        self.transition(self.state_map[cell_type])
         self.temperature = randint(
             self.state.temp_range["min"], self.state.temp_range["max"]
         )
         self.wind = choice(["N", "S", "W", "E"])
-        self.pollution = (
-            0.7
-            if instantiated_concrete_state == self.state_map["C"]
-            else uniform(0, 0.4)
-        )
+        self.pollution = 0.7 if cell_type == "C" else uniform(0, 0.4)
         self.clouds = random()
 
     def transition_enqueue(self, state: Sea | Ice | Forest | Desert | City | Mountain):

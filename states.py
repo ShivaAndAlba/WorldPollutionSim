@@ -108,7 +108,7 @@ class Forest(State):
     state_symbol = "F"
     state_color = "#7ed321"
     temp_range = {"min": 0, "max": 30}
-    factors = {"temp": -0.1}
+    factors = {"temp": -0.3}
 
     def effect(self):
         self.calculate_weather_change(self.temp_range, self.factors)
@@ -122,7 +122,7 @@ class Desert(State):
     state_symbol = "D"
     state_color = "#f8e71c"
     temp_range = {"min": 30, "max": 50}
-    factors = {"temp": 0.5}
+    factors = {"temp": 0.2}
 
     def effect(self):
         self.calculate_weather_change(self.temp_range, self.factors)
@@ -134,7 +134,7 @@ class City(State):
     state_symbol = "C"
     state_color = "#9b9b9b"
     temp_range = {"min": 0, "max": 40}
-    factors = {"temp": 0.8}
+    factors = {"temp": 0.3}
 
     def effect(self):
         self.calculate_weather_change(self.temp_range, self.factors)
