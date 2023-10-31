@@ -42,7 +42,7 @@ class GlobalWarmingModel:
 
 class Gui:
     def __init__(self):
-        self.blocked = False
+        self.blocked = None
         self.sim_iter = 20
 
         """creates gui via tkinter"""
@@ -81,7 +81,7 @@ class Gui:
         self.entry_frame.grid(row=1, column=0, columnspan=1, rowspan=1)
 
         self.entry_label = tk.Label(
-            self.entry_frame, text="Set # itterations(Default:300)"
+            self.entry_frame, text="Set # itterations(Default:20)"
         )
         self.entry_box = tk.Entry(self.entry_frame, width=11)
         self.entry_box.insert(0, str(self.sim_iter))
@@ -95,30 +95,34 @@ class Gui:
     def set_itteration(self):
         self.sim_iter = int(self.entry_box.get())
 
-    def sim_run(self):
-        self.blocked = False
-
-        for _ in range(self.sim_iter):
-            print("itr:", _)
-            # calculate next generation
-            self.calculate_next_gen()
-            # transition every cell to new state ,
-            # update temp text and update cell color
-            self.update_cells()
-            self.root.update_idletasks()
-            # calculate average and store
-            # chech if sim_run  is false then exit
-            if self.blocked:
-                break
-            # wait for 50 ms
-            sleep(0.1)
-        pass
+    def run_iteration(self):
+        # calculate next generation
+        self.calculate_next_gen()
+        # transition every cell to new state ,
+        # update temp text and update cell color
+        self.update_cells()
+        self.root.update_idletasks()
+        # calculate average and store
+        # chech if sim_run  is false then exit
+        # if self.blocked:
+        #     break
+        # wait for 50 ms
+        if self.sim_iter:
+            self.sim_iter -= 1
+            print(self.sim_iter)
+            self.blocked = self.root.after(100, self.run_iteration)
+        else:
+            self.sim_iter = 20
+            self.sim_stop()
 
     def sim_reset(self):
         self.grid.reset()
 
     def sim_stop(self):
-        self.blocked = True
+        self.root.after_cancel(self.blocked)
+
+    def sim_run(self):
+        self.run_iteration()
 
     def tk_mainloop(self):
         self.root.mainloop()
