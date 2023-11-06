@@ -1,3 +1,23 @@
+from dataclasses import dataclass
+
+
+@dataclass
+class WorldDiementions:
+    cell_num_length: int
+    cell_num_width: int
+    cell_size: int
+
+    @property
+    def length(self) -> int:
+        """returns cell length"""
+        return self.cell_num_length * self.cell_size
+
+    @property
+    def width(self) -> int:
+        """returns cell width"""
+        return self.cell_num_width * self.cell_size
+
+
 worldMap = [
     [
         "S",
@@ -840,3 +860,8 @@ worldMap = [
         "I",
     ],
 ]
+global g_world_diemention
+
+g_world_diemention = WorldDiementions(
+    cell_num_length=len(worldMap[0]), cell_num_width=len(worldMap), cell_size=20
+)

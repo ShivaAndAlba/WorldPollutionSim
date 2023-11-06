@@ -9,7 +9,7 @@ import numpy as np
 class State(ABC):
     """
     Interface for cell's state.
-    Cell can change states according to the weather in state state.
+    Cell can change states according to the weather in state.
     state change is determind by cell's neighbors from N,S,W,E
     state affect diffrently on other states
     states are described with classes Sea,Ice,Forest,Desert,City
@@ -23,6 +23,12 @@ class State(ABC):
     pollution raises temperature.
     clouds are created over forests and sea, and sometimes
     drops rain witch lowers temperature and lowers pollution.
+    ...
+
+    Properties:
+    ----------
+    cell: Cell
+        handle of a cell
     """
 
     def __init__(self):
@@ -81,6 +87,25 @@ class State(ABC):
 
 
 class Sea(State):
+    """
+    state represent Sea
+    change to state Ice if temperature is low
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "S"
     state_color = "#1273de"
     temp_range = {"min": 0, "max": 35}
@@ -93,6 +118,25 @@ class Sea(State):
 
 
 class Ice(State):
+    """
+    state represent Ice
+    change to state Sea if temperature is high
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "I"
     state_color = "#ffffff"
     temp_range = {"min": -50, "max": 0}
@@ -105,6 +149,26 @@ class Ice(State):
 
 
 class Forest(State):
+    """
+    state represent Forest
+    change to state Desert if temperature is high
+    change to state Ice if temperature is low
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "F"
     state_color = "#7ed321"
     temp_range = {"min": 0, "max": 30}
@@ -119,6 +183,25 @@ class Forest(State):
 
 
 class Desert(State):
+    """
+    state represent Desert
+    change to state Forest if temperature is low
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "D"
     state_color = "#f8e71c"
     temp_range = {"min": 30, "max": 50}
@@ -131,6 +214,25 @@ class Desert(State):
 
 
 class City(State):
+    """
+    state represent City
+    change to state Desert if temperature high
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "C"
     state_color = "#9b9b9b"
     temp_range = {"min": 0, "max": 40}
@@ -145,6 +247,24 @@ class City(State):
 
 
 class Mountain(State):
+    """
+    state represent mountain
+    ...
+    Attributes:
+    ----------
+    state_symbol: str
+        letter representing the state
+
+    state_color: str
+        hex representaion of state's color
+
+    temp_range: dict[str, int]
+        range of minimal and maximal temperature values
+
+    factors: dict[str, int]
+        relative effect on temperature in current state
+    """
+
     state_symbol = "M"
     state_color = "#57360e"
     temp_range = {"min": -20, "max": 20}
