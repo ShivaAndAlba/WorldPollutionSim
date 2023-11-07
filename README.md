@@ -4,11 +4,11 @@ A case study of [Cellular Atomata](https://en.wikipedia.org/wiki/Cellular_automa
 
 ## Description
 
-The idea came from a project in a course called "Biological Computation" in the Open University of Israel.
+The idea came from a project in a course called "Biological Computation" at the Open University of Israel.
 The simplest example of Cellular Automata is [Conwey's game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), where simple rules in a system create complex behaviors.
 
-Here I applied the same principals to model global warming effect of pollution, its far from accurate or represents any real world model but it still repents how a 
-small changes and simple rules can create big changes in a system.
+Here I applied the same principals to model the global warming effect of pollution, its far from accurate or representative any real-world model, but it still represents how 
+small changes and simple rules can create significant changes in a system.
 
 examples:
 1. initial state
