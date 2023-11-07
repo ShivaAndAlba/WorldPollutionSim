@@ -12,11 +12,11 @@ small changes and simple rules can create big changes in a system.
 
 examples:
 1. initial state
-[initial_state](./images/initial_state.png)
+![initial_state](./images/initial_state.png)
 2. end state 
-[end_state1](./images/end_state1.png)
+![end_state1](./images/end_state1.png)
 3. diffrent end state
-[end_state2](./images/end_state2.png)
+![end_state2](./images/end_state2.png)
 
 In short each cell in a 2d grid has neighbors around him, at each iteration we look at a cell and the surrounding neighbors.
 We calculate the surrounding neighbors effect, based on predefined factors and conditions, on the current cell and update current cell state.
