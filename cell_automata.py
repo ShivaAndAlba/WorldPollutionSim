@@ -49,18 +49,18 @@ class CellCanvas:
             fill=self.cell_color(),
         )
 
-    def cell_color(self) -> str:
-        return self.cell.state.state_color
-
-    def update_cell_color(self):
-        self.canvas.itemconfig(self.cell_canvas, fill=self.cell_color())
-
     def init_text(self):
         return self.canvas.create_text(
             (self.cell.x_cord + 0.5) * self.cell_size,
             (self.cell.y_cord + 0.5) * self.cell_size,
             text=str(self.cell.temperature),
         )
+
+    def cell_color(self) -> str:
+        return self.cell.state.state_color
+
+    def update_cell_color(self):
+        self.canvas.itemconfig(self.cell_canvas, fill=self.cell_color())
 
     def update_text(self):
         self.canvas.itemconfigure(self.cell_text, text=str(int(self.cell.temperature)))
@@ -91,26 +91,6 @@ class Neighborhood:
         self.set_west(cell)
         self.set_east(cell)
 
-    def cell_north_bound(self, cell: Cell) -> bool:
-        """checks if cell is at the top of the grid"""
-        return cell.y_cord == 0
-
-    def cell_south_bound(self, cell: Cell) -> bool:
-        """check if cell is at the bottom of the grid"""
-        return cell.y_cord > gw.g_world_diemention.cell_num_width - 2
-
-    def cell_west_bound(self, cell: Cell) -> bool:
-        """check if cell is at the rightest of the grid"""
-        return cell.x_cord == 0
-
-    def cell_east_bound(self, cell: Cell) -> bool:
-        """check if cell is the leftest of the grid"""
-        return cell.x_cord > gw.g_world_diemention.cell_num_length - 2
-
-    @property
-    def north(self) -> Cell:
-        return self._north
-
     def set_north(self, cell: Cell):
         if self.cell_north_bound(cell):
             y_cord = gw.g_world_diemention.cell_num_width - 1
@@ -118,10 +98,6 @@ class Neighborhood:
             y_cord = cell.y_cord - 1
 
         self._north = self.grid.cell_obj_at(y_cord, cell.x_cord)
-
-    @property
-    def south(self) -> Cell:
-        return self._south
 
     def set_south(self, cell: Cell):
         if self.cell_south_bound(cell):
@@ -131,10 +107,6 @@ class Neighborhood:
 
         self._south = self.grid.cell_obj_at(y_cord, cell.x_cord)
 
-    @property
-    def west(self) -> Cell:
-        return self._west
-
     def set_west(self, cell: Cell):
         if self.cell_west_bound(cell):
             x_cord = gw.g_world_diemention.cell_num_length - 1
@@ -142,10 +114,6 @@ class Neighborhood:
             x_cord = cell.x_cord - 1
 
         self._west = self.grid.cell_obj_at(cell.y_cord, x_cord)
-
-    @property
-    def east(self) -> Cell:
-        return self._east
 
     def set_east(self, cell: Cell):
         if self.cell_east_bound(cell):
@@ -155,16 +123,44 @@ class Neighborhood:
 
         self._east = self.grid.cell_obj_at(cell.y_cord, x_cord)
 
+    def cell_north_bound(self, cell: Cell) -> bool:
+        return cell.y_cord == 0
+
+    def cell_south_bound(self, cell: Cell) -> bool:
+        return cell.y_cord > gw.g_world_diemention.cell_num_width - 2
+
+    def cell_west_bound(self, cell: Cell) -> bool:
+        return cell.x_cord == 0
+
+    def cell_east_bound(self, cell: Cell) -> bool:
+        return cell.x_cord > gw.g_world_diemention.cell_num_length - 2
+
     def everyone(self) -> dict[str, Cell]:
         return {"N": self.north, "S": self.south, "W": self.west, "E": self.east}
 
-    def mean_of(self) -> dict:
+    def mean_of(self) -> dict[str, int | str]:
         temp_mean = np.mean(
             [neighbor.temperature for neighbor in self.everyone().values()]
         )
         wind_neighbors = [neighbor.wind for neighbor in self.everyone().values()]
         wind_mean = max(wind_neighbors, key=wind_neighbors.count)
         return {"temp_mean": temp_mean, "wind_mean": wind_mean}
+
+    @property
+    def north(self) -> Cell:
+        return self._north
+
+    @property
+    def south(self) -> Cell:
+        return self._south
+
+    @property
+    def west(self) -> Cell:
+        return self._west
+
+    @property
+    def east(self) -> Cell:
+        return self._east
 
 
 class Cell:
@@ -217,12 +213,6 @@ class Cell:
         self._coordinates = coordinate
         self.init_weather(cell_type)
 
-    def update_cell_color(self):
-        self.cell_canvas.update_cell_color()
-
-    def update_cell_text(self):
-        self.cell_canvas.update_text()
-
     def init_weather(self, cell_type: str):
         self.transition(self.state_map[cell_type])
         self.temperature = randint(
@@ -231,6 +221,15 @@ class Cell:
         self.wind = choice(["N", "S", "W", "E"])
         self.pollution = 0.7 if cell_type == "C" else uniform(0, 0.4)
         self.clouds = random()
+
+    def neighbors_init(self, grid: gw.Grid):
+        self._neighbor = Neighborhood(self, grid)
+
+    def update_cell_color(self):
+        self.cell_canvas.update_cell_color()
+
+    def update_cell_text(self):
+        self.cell_canvas.update_text()
 
     def transition_enqueue(self, state: Sea | Ice | Forest | Desert | City | Mountain):
         self.transition_queue.append(state)
@@ -244,12 +243,21 @@ class Cell:
         self._state.cell = self
 
     @property
+    def state(self) -> Sea | Ice | Forest | Desert | City | Mountain:
+        return self._state
+
+    @property
     def neighbors(self):
         """returns Neighborhood instance of current cell"""
         return self._neighbor
 
-    def neighbors_init(self, grid: gw.Grid):
-        self._neighbor = Neighborhood(self, grid)
+    @property
+    def cell_canvas(self) -> CellCanvas:
+        return self._cell_canvas
+
+    @cell_canvas.setter
+    def cell_canvas(self, cell_canvas_inst: CellCanvas):
+        self._cell_canvas = cell_canvas_inst
 
     @property
     def x_cord(self) -> int:
@@ -292,15 +300,3 @@ class Cell:
     @clouds.setter
     def clouds(self, val: float):
         self._clouds = val
-
-    @property
-    def cell_canvas(self) -> CellCanvas:
-        return self._cell_canvas
-
-    @cell_canvas.setter
-    def cell_canvas(self, cell_canvas_inst: CellCanvas):
-        self._cell_canvas = cell_canvas_inst
-
-    @property
-    def state(self) -> Sea | Ice | Forest | Desert | City | Mountain:
-        return self._state

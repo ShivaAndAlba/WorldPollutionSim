@@ -131,7 +131,7 @@ class GWModel:
                 cell.update_cell_text()
 
     @property
-    def canvas(self):
+    def canvas(self) -> tk.Canvas:
         return self._canvas
 
     @canvas.setter

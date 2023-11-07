@@ -34,18 +34,6 @@ class State(ABC):
     def __init__(self):
         pass
 
-    @property
-    def cell(self):
-        return self._cell
-
-    @cell.setter
-    def cell(self, cell):
-        self._cell = cell
-
-    @abstractmethod
-    def effect(self):
-        pass
-
     def calculate_weather_change(self, temp_range: dict, factors: dict):
         # calculate wind change
         self.cell.wind = choice(
@@ -84,6 +72,18 @@ class State(ABC):
             self.cell.temperature = temp_range["max"]
         elif self.cell.temperature < temp_range["min"]:
             self.cell.temperature = temp_range["min"]
+
+    @abstractmethod
+    def effect(self):
+        pass
+
+    @property
+    def cell(self):
+        return self._cell
+
+    @cell.setter
+    def cell(self, cell):
+        self._cell = cell
 
 
 class Sea(State):
