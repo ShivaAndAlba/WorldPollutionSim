@@ -1,6 +1,6 @@
 # Global Warming Model
 
-A case study of [Cellular Atomata](https://en.wikipedia.org/wiki/Cellular_automaton/) and object oriented design princepels. 
+A case study of [Cellular Atomata](https://en.wikipedia.org/wiki/Cellular_automaton) and object oriented design princepels. 
 
 ## Description
 
@@ -12,11 +12,11 @@ small changes and simple rules can create big changes in a system.
 
 examples:
 1. initial state
-[](./images/initial_state.png)
+[initial_state](./images/initial_state.png)
 2. end state 
-[](./images/end_state1.png)
+[end_state1](./images/end_state1.png)
 3. diffrent end state
-[](./images/end_state2.png)
+[end_state2](./images/end_state2.png)
 
 In short each cell in a 2d grid has neighbors around him, at each iteration we look at a cell and the surrounding neighbors.
 We calculate the surrounding neighbors effect, based on predefined factors and conditions, on the current cell and update current cell state.
@@ -28,13 +28,13 @@ Cells transition to next state is implemented using a queue, after full iteratio
 
 1. Install [NumPy](https://numpy.org/install/)
 2. Clone repository:
-'''
+```
 git clone https://github.com/ShivaAndAlba/WorldPollutionSim.git
-'''
+```
 3. From WorldPollutionSim directory in cli:
-'''
+```
 python GWModel.py
-'''
+```
 4. Enjoy.
 
 ## Authors
